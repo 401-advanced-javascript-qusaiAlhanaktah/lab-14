@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const users = new mongoose.Schema({
   username: {type: String, required: true, unique: true},
   password: {type: String, required: true},
+  role: {type: String, required: true, default:'user', enum:['user', 'editor', 'admin']},
 });
 
 users.pre('save', async function(){
