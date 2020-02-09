@@ -11,6 +11,40 @@ const users = new mongoose.Schema({
   role: {type: String, required: true, default:'user', enum:['user', 'editor', 'admin']},
 });
 
+// const capabilities = {
+//   admin: ['read, create, update, delete'],
+//   editor: ['read, create, update'],
+//   user: ['read'],
+// };
+users.statics.checkCapabilities = (capability, role)=>{
+  console.log(capability, role);
+  // let arr = [];
+  // Object.values(capabilities).forEach(val=>{
+  //   arr.push(val.includes(capability));
+  // });
+  let admin = ['read, create, update, delete'];
+  let editor = ['read, create, update'];
+  let user = ['read'];
+
+  if(role === 'admin' ){
+    for(let i = 0; i < admin.length;i++){
+      if(admin[i]) return true;
+    }
+  }
+  if(role === 'editor' ){
+    for(let i = 0; i < editor.length;i++){
+      if(editor[i]) return true;
+    }
+  }
+  if(role === 'user' ){
+    for(let i = 0; i < user.length;i++){
+      if(user[i]) return true;
+    }
+  }
+  // Object.values(capabilities).forEach(val=>{
+  //   console.log(val.includes(capability));
+  // });
+};
 users.pre('save', async function(){
   if (!users.username) {
     this.password = await bcrypt.hash(this.password, 10);
@@ -33,6 +67,7 @@ users.methods.generateToken = function(user) {
     username: user.username,
     capabilities: user.role,
   };
+  console.log(userData);
   let token = jwt.sign(userData, process.env.SECRET);
   return token;
   // let token = jwt.sign({ username: user.username}, process.env.SECRET);
@@ -57,5 +92,4 @@ users.statics.authenticateToken = async function(token){
     return Promise.reject();
   }
 };
-
 module.exports = mongoose.model('users',users);
